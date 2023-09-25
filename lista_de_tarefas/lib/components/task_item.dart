@@ -64,10 +64,15 @@ class TaskItemList extends StatelessWidget {
                 ),
                 Container(
                   width: MediaQuery.of(context).size.width * .15,
-                  padding: const EdgeInsets.only(right: 10),
-                  height: MediaQuery.of(context).size.height * .05,
+                  height: MediaQuery.of(context).size.height * .1,
                   alignment: Alignment.center,
-                  color: Colors.red,
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                    ),
+                    color: Colors.red,
+                  ),
                   child: IconButton(
                     onPressed: () {
                       onDelete(task);

@@ -126,14 +126,13 @@ class _TodoIstPageState extends State<TodoIstPage> {
                         topRight: Radius.circular(10)
                       )
                     ),
-                    child: const Icon(
-                      Icons.add,
-                      size: 25,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-
-                    }
+                    onPressed: showConfirmDialog,
+                    child: const Text(
+                      "Limpar tudo",
+                      style: TextStyle(
+                        color: Colors.white
+                      )
+                    )
                   )
                 ],
               )
@@ -144,6 +143,60 @@ class _TodoIstPageState extends State<TodoIstPage> {
     );
   }
 
+  void showConfirmDialog(){
+    if(tasks.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.grey,
+          behavior: SnackBarBehavior.floating,
+          content: Text('Nenhuma tarefa adicionada')
+        )
+      );
+    }else{
+      showDialog(
+        context: context, 
+        builder: (context) => AlertDialog(
+          title: const Text(
+            "Limpar tudo?"
+          ),
+          content: const Text(
+            "Deseja realmente excluir todas as suas tarefas?"
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), 
+              child: const Text(
+                "Cancelar",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold
+                )
+              )
+            ),
+            TextButton(
+              onPressed: onAllDelete, 
+              child: const Text(
+                "Limpar tudo",
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold
+                )
+              )
+            )
+          ],
+        )
+      );
+    }
+  }
+
+  void onAllDelete(){
+    setState(() {
+      tasks.clear();
+    });
+
+    Navigator.pop(context);
+  }
+
   void onDelete(Task task){
     setState(() {
       tasks.remove(task);
@@ -151,7 +204,8 @@ class _TodoIstPageState extends State<TodoIstPage> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('asdsad'),
+        behavior: SnackBarBehavior.floating,
+        content: const Text('Clique em desfazer a ação de exclusão'),
         action: SnackBarAction(label: 'Desfazer', onPressed: () {
           setState(() {
             tasks.add(task);
