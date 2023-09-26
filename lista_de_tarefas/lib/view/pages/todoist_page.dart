@@ -1,9 +1,11 @@
 // ignore_for_file: unused_local_variable
 
 import 'package:flutter/material.dart';
-import 'package:lista_de_tarefas/components/task_item.dart';
+import 'package:lista_de_tarefas/controller/repository/task_repository.dart';
+import 'package:lista_de_tarefas/shared/custom_message.dart';
+import 'package:lista_de_tarefas/view/components/task_item.dart';
 
-import '../models/task.dart';
+import '../../models/task.dart';
 
 class TodoIstPage extends StatefulWidget {
   const TodoIstPage({super.key});
@@ -15,10 +17,18 @@ class TodoIstPage extends StatefulWidget {
 class _TodoIstPageState extends State<TodoIstPage> {
   List<Task> tasks = List.empty(growable: true);
   TextEditingController taskController = TextEditingController();
+  final TaskRepository taskRepository = TaskRepository();
+  String? errorText;
 
   @override
   void initState() {
     super.initState();
+
+    taskRepository.get(key: "tasks").then((value) {
+      setState(() {
+        tasks = value;
+      });
+    });
   }
 
   @override
@@ -38,23 +48,26 @@ class _TodoIstPageState extends State<TodoIstPage> {
                   Expanded(
                     child: TextFormField(
                       controller: taskController,
-                      onFieldSubmitted: (value) {
+                      onFieldSubmitted: (value) async => await insertTask(),
+                      onChanged: (value) {
                         if(value.trim().isNotEmpty){
                           setState(() {
-                            Task newTask = Task(title: taskController.text, datetime: DateTime.now());
-                            tasks.add(newTask);
-                            taskController.clear();
+                            errorText = null;
                           });
                         }
                       },
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Tarefa',
                         hintText: 'Adicione sua tarefa aqui',
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
+                        errorText: errorText,
+                        border: const OutlineInputBorder(),
+                        focusedBorder: const OutlineInputBorder(
                           borderSide: BorderSide(
                             color: Colors.green
                           )
+                        ),
+                        labelStyle: const TextStyle(
+                          color: Colors.green
                         )
                       ),
                     ),
@@ -71,18 +84,12 @@ class _TodoIstPageState extends State<TodoIstPage> {
                         topRight: Radius.circular(10)
                       )
                     ),
+                    onPressed: () async => await insertTask(),
                     child: const Icon(
                       Icons.add,
                       size: 25,
                       color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        Task newTask = Task(title: taskController.text, datetime: DateTime.now());
-                        tasks.add(newTask);
-                        taskController.clear();
-                      });
-                    }
+                    )
                   )
                 ],
               ),
@@ -91,8 +98,8 @@ class _TodoIstPageState extends State<TodoIstPage> {
               const Text(
                 'Nenhuma tarefa adicionada...',
                 style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w700
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w700
                 ),
               ),
               Flexible(
@@ -141,6 +148,27 @@ class _TodoIstPageState extends State<TodoIstPage> {
         ),
       ),
     );
+  }
+
+  insertTask() async{
+    if(taskController.text.trim().isNotEmpty){
+      setState(() {
+        errorText = null;
+        Task newTask = Task(title: taskController.text, datetime: DateTime.now());
+        tasks.add(newTask);
+        taskController.clear();
+      });
+    }else{
+      // setState(() {
+      //   errorText = "É necessário inserir uma tarefa";
+      // });
+
+      CustomMessage().showMessage(
+        context: context, 
+        message: "É necessário inserir uma tarefa", 
+        isSuccess: false
+      );
+    }
   }
 
   void showConfirmDialog(){
@@ -194,6 +222,8 @@ class _TodoIstPageState extends State<TodoIstPage> {
       tasks.clear();
     });
 
+    taskRepository.insert(key: "tasks", value: tasks);
+
     Navigator.pop(context);
   }
 
@@ -201,6 +231,7 @@ class _TodoIstPageState extends State<TodoIstPage> {
     setState(() {
       tasks.remove(task);
     });
+    taskRepository.insert(key: "tasks", value: tasks);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -210,6 +241,8 @@ class _TodoIstPageState extends State<TodoIstPage> {
           setState(() {
             tasks.add(task);
           });
+
+          taskRepository.insert(key: "tasks", value: tasks);
         }),
       )
     );

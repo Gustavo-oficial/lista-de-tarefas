@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lista_de_tarefas/pages/todoist_page.dart';
+import 'package:lista_de_tarefas/view/pages/todoist_page.dart';
 
 void main() {
   runApp(const MyApp());

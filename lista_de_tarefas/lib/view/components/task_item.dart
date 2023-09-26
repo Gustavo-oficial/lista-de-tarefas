@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../models/task.dart';
+import '../../models/task.dart';
 
 class TaskItemList extends StatelessWidget {
   const TaskItemList({Key? key, required this.task, required this.onDelete}) : super(key: key);
